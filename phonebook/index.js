@@ -4,17 +4,16 @@ const cors = require('cors')
 require('dotenv').config()
 const app = express()
 
-
-//const password = process.argv[2]
+// Import Person model
 const Person = require('./models/person')
 
+// Middleware
 app.use(cors())
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(express.static('dist'))
 
-//const url = process.env.MONGODB_URI
-
+// Custom token for morgan
 morgan.token('body', (req, res) => {
   if (req.method === 'POST') {
     return JSON.stringify(req.body)
@@ -27,6 +26,7 @@ app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
+// Get person by ID
 app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
@@ -41,6 +41,7 @@ app.get('/api/persons/:id', (request, response, next) => {
     })
 })
 
+// Get all persons
 app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(persons => {
     response.json(persons)
@@ -48,6 +49,7 @@ app.get('/api/persons', (request, response, next) => {
     .catch(error => next(error))
 })
 
+// Info
 app.get('/info', (request, response, next) => {
   const date = new Date()
   Person.find({}).then(persons => {
@@ -56,6 +58,7 @@ app.get('/info', (request, response, next) => {
     .catch(error => next(error))
 })
 
+// Delete person
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(() => {
@@ -66,7 +69,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
     })
 })
 
-
+// Add person
 app.post('/api/persons', async (request, response, next) => {
   const body = request.body
 
@@ -100,6 +103,7 @@ app.post('/api/persons', async (request, response, next) => {
   }
 })
 
+// Update person
 app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
   console.log('Received ID for update:', request.params.id)
@@ -117,7 +121,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-
+// unknown endpoint handler
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
@@ -146,6 +150,7 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler)
 
+//const PORT = 3001
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
